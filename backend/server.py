@@ -154,9 +154,7 @@ Utils:
 @_safe_track(name="get_migration_help")
 def get_migration_help(question: str) -> str:
     """Help developers migrate from PyCelonis 1.x to PyCelonis 2.x."""
-    matches = _retrieve(question, filter={"source": {"$contains": "migration"}})
-    if not matches:
-        matches = _retrieve(question)
+    matches = _retrieve(question)
     context, sources = _format_context(matches)
 
     system = (
