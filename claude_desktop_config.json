@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "pycelonis-mcp": {
+      "type": "sse",
+      "url": "https://pycelonis-mcp.onrender.com/sse"
+    }
+  }
+}
