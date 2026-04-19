@@ -23,7 +23,7 @@ index = pc.Index(os.environ.get("PINECONE_INDEX_NAME", ""))
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
 
-mcp = FastMCP("pycelonis-mcp")
+mcp = FastMCP("pycelonis-mcp", host="0.0.0.0", port=8000)
 
 GROQ_MODEL = "llama-3.3-70b-versatile"
 TOP_K = 5
