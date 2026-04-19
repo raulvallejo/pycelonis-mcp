@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+starlette
+python-dotenv
+langchain-openai
+langchain-text-splitters
+openai
+pinecone
+groq
+opik
+requests
+beautifulsoup4
+tiktoken
+mcp
+httpx
