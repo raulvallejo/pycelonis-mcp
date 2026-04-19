@@ -18,10 +18,10 @@ def _safe_track(*args, **kwargs):
         return noop
 
 
-pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
-index = pc.Index(os.environ["PINECONE_INDEX_NAME"])
+pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY", ""))
+index = pc.Index(os.environ.get("PINECONE_INDEX_NAME", ""))
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-groq_client = Groq(api_key=os.environ["GROQ_API_KEY"])
+groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
 
 mcp = FastMCP("pycelonis-mcp")
 
