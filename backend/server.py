@@ -169,24 +169,28 @@ def get_migration_help(question: str) -> str:
     return f"{answer}\n\nSources:\n{sources_block}"
 
 
+# Always create the app at module level for uvicorn
+from starlette.applications import Starlette
+from starlette.routing import Route, Mount
+from starlette.responses import JSONResponse
+
+
+async def health(request):
+    return JSONResponse({"status": "ok", "service": "pycelonis-mcp"})
+
+
+app = Starlette(routes=[
+    Route("/health", health),
+    Mount("/", app=mcp.sse_app()),
+])
+
+
+# Run based on transport
 if __name__ == "__main__":
     transport = os.environ.get("MCP_TRANSPORT", "stdio")
-    port = int(os.environ.get("PORT", 8000))
-
     if transport == "sse":
         import uvicorn
-        from starlette.applications import Starlette
-        from starlette.routing import Route, Mount
-        from starlette.responses import JSONResponse
-
-        async def health(request):
-            return JSONResponse({"status": "ok", "service": "pycelonis-mcp"})
-
-        app = Starlette(routes=[
-            Route("/health", health),
-            Mount("/", app=mcp.sse_app()),
-        ])
-
+        port = int(os.environ.get("PORT", 8000))
         uvicorn.run(app, host="0.0.0.0", port=port)
     else:
         mcp.run(transport="stdio")
