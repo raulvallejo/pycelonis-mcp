@@ -179,6 +179,8 @@ def get_migration_help(question: str) -> str:
 
 
 # Always create the app at module level for uvicorn
+from contextlib import asynccontextmanager
+
 from starlette.applications import Starlette
 from starlette.routing import Route, Mount
 from starlette.responses import JSONResponse
@@ -193,6 +195,12 @@ async def _startup():
     _initialized = True
 
 
+@asynccontextmanager
+async def lifespan(app):
+    await _startup()
+    yield
+
+
 async def health(request):
     return JSONResponse({"status": "ok", "service": "pycelonis-mcp"})
 
@@ -202,7 +210,7 @@ app = Starlette(
         Route("/health", health),
         Mount("/", app=mcp.sse_app()),
     ],
-    on_startup=[_startup],
+    lifespan=lifespan,
 )
 
 
