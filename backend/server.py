@@ -20,10 +20,11 @@ def _safe_track(*args, **kwargs):
         return noop
 
 
-pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY", ""))
-index = pc.Index(os.environ.get("PINECONE_INDEX_NAME", ""))
-embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
+pc = None
+index = None
+embeddings = None
+groq_client = None
+_initialized = False
 
 mcp = FastMCP("pycelonis-mcp", host="0.0.0.0", port=8000)
 
@@ -67,7 +68,7 @@ def _chat(system: str, user: str) -> str:
 @_safe_track(name="ask_pycelonis")
 def ask_pycelonis(question: str) -> str:
     """General Q&A about the PyCelonis 2.14.2 SDK."""
-    if not pc or not index or not embeddings or not groq_client:
+    if not _initialized:
         return "Service is still initializing. Please try again in a few seconds."
     matches = _retrieve(question)
     context, sources = _format_context(matches)
@@ -88,7 +89,7 @@ def ask_pycelonis(question: str) -> str:
 @_safe_track(name="get_code_example")
 def get_code_example(task: str) -> str:
     """Return a ready-to-use PyCelonis 2.14.2 code example for a given task."""
-    if not pc or not index or not embeddings or not groq_client:
+    if not _initialized:
         return "Service is still initializing. Please try again in a few seconds."
     matches = _retrieve(task)
     context, sources = _format_context(matches)
@@ -160,7 +161,7 @@ Utils:
 @_safe_track(name="get_migration_help")
 def get_migration_help(question: str) -> str:
     """Help developers migrate from PyCelonis 1.x to PyCelonis 2.x."""
-    if not pc or not index or not embeddings or not groq_client:
+    if not _initialized:
         return "Service is still initializing. Please try again in a few seconds."
     matches = _retrieve(question)
     context, sources = _format_context(matches)
@@ -183,14 +184,26 @@ from starlette.routing import Route, Mount
 from starlette.responses import JSONResponse
 
 
+async def _startup():
+    global pc, index, embeddings, groq_client, _initialized
+    pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY", ""))
+    index = pc.Index(os.environ.get("PINECONE_INDEX_NAME", ""))
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+    groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
+    _initialized = True
+
+
 async def health(request):
     return JSONResponse({"status": "ok", "service": "pycelonis-mcp"})
 
 
-app = Starlette(routes=[
-    Route("/health", health),
-    Mount("/", app=mcp.sse_app()),
-])
+app = Starlette(
+    routes=[
+        Route("/health", health),
+        Mount("/", app=mcp.sse_app()),
+    ],
+    on_startup=[_startup],
+)
 
 
 # Run based on transport
