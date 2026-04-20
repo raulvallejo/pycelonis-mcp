@@ -6,6 +6,8 @@ import os
 import opik
 from groq import Groq
 from langchain_openai import OpenAIEmbeddings
+import asyncio
+
 from mcp.server.fastmcp import FastMCP
 from pinecone import Pinecone
 
@@ -65,6 +67,8 @@ def _chat(system: str, user: str) -> str:
 @_safe_track(name="ask_pycelonis")
 def ask_pycelonis(question: str) -> str:
     """General Q&A about the PyCelonis 2.14.2 SDK."""
+    if not pc or not index or not embeddings or not groq_client:
+        return "Service is still initializing. Please try again in a few seconds."
     matches = _retrieve(question)
     context, sources = _format_context(matches)
 
@@ -84,6 +88,8 @@ def ask_pycelonis(question: str) -> str:
 @_safe_track(name="get_code_example")
 def get_code_example(task: str) -> str:
     """Return a ready-to-use PyCelonis 2.14.2 code example for a given task."""
+    if not pc or not index or not embeddings or not groq_client:
+        return "Service is still initializing. Please try again in a few seconds."
     matches = _retrieve(task)
     context, sources = _format_context(matches)
 
@@ -154,6 +160,8 @@ Utils:
 @_safe_track(name="get_migration_help")
 def get_migration_help(question: str) -> str:
     """Help developers migrate from PyCelonis 1.x to PyCelonis 2.x."""
+    if not pc or not index or not embeddings or not groq_client:
+        return "Service is still initializing. Please try again in a few seconds."
     matches = _retrieve(question)
     context, sources = _format_context(matches)
 
