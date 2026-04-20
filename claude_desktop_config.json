@@ -1,8 +1,9 @@
 {
   "mcpServers": {
     "pycelonis-mcp": {
-      "type": "sse",
-      "url": "https://pycelonis-mcp.onrender.com/sse"
+      "command": "npx",
+      "args": ["-y", "mcp-remote@latest", "https://pycelonis-mcp.onrender.com/sse"],
+      "timeout": 30000
     }
   }
 }
